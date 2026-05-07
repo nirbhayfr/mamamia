@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+    /* Brand Colors */
+    --color-bg-primary: #f5f0e8;
+    /* Warm cream/off-white background */
+    --color-bg-secondary: #ede8de;
+    /* Slightly darker cream for right panel */
+    --color-bg-dark: #1a1a18;
+    /* Near-black navbar */
+
+    --color-text-dark: #1a1a18;
+    /* Primary dark text */
+    --color-text-gold: #b8915a;
+    /* Gold/amber accent text (subheading, nav links) */
+    --color-text-muted: #6b6458;
+    /* Muted body text */
+    --color-text-light: #f5f0e8;
+    /* Light text on dark bg */
+
+    --color-gold: #b8915a;
+    /* Gold accent */
+    --color-gold-dark: #9a7a48;
+    /* Darker gold for hover */
+
+    --color-btn-primary-bg: #1a1a18;
+    /* Black CTA button */
+    --color-btn-primary-text: #f5f0e8;
+    /* Cream text on black button */
+    --color-btn-outline-border: #1a1a18;
+    /* Outline button border */
+    --color-btn-outline-text: #1a1a18;
+    /* Outline button text */
+
+    --color-ticker-bg: #1a1a18;
+    /* Bottom ticker bar */
+    --color-ticker-text: #f5f0e8;
+    /* Ticker text */
+
+    --color-badge-bg: #b8915a;
+    /* Bestseller badge */
+    --color-badge-text: #f5f0e8;
+    /* Badge text */
+
+    --color-divider: #d4cfc5;
+    /* Divider lines */
+
+    /* Soap Swatch Colors */
+    --color-soap-jasmine: #2e5540;
+    /* Deep forest green */
+    --color-soap-sandalwood: #b8702e;
+    /* Warm amber/brown */
+    --color-soap-red-sandalwood: #8b1a4a;
+    /* Deep magenta/plum */
+    --color-soap-charcoal: #1e1e1e;
+    /* Near black */
+
+    /* Typography */
+    --font-display: 'Cormorant Garamond', 'Garamond', Georgia, serif;
+    --font-body: 'Jost', 'Gill Sans', sans-serif;
+}
+
+@theme inline {
+    --color-brand-cream: var(--color-bg-primary);
+    --color-brand-cream-dark: var(--color-bg-secondary);
+    --color-brand-dark: var(--color-bg-dark);
+    --color-brand-gold: var(--color-gold);
+    --color-brand-muted: var(--color-text-muted);
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-dark);
+    margin: 0;
+    padding: 0;
+}
