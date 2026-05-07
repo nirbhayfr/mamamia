@@ -70,8 +70,7 @@ export default function RitualSet() {
 							key={i}
 							style={{
 								position: "absolute",
-								width: "120px",
-								height: "120px",
+
 								borderRadius: "10px",
 								backgroundColor: soap.color,
 								transform: `rotate(${soap.rotate})`,
@@ -83,6 +82,7 @@ export default function RitualSet() {
 									"4px 6px 18px rgba(0,0,0,0.18)",
 								padding: "10px",
 							}}
+							className="size-26 md:size-30"
 						>
 							<img
 								src={soap.img}

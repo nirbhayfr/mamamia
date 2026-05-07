@@ -337,10 +337,8 @@ export default function Footer() {
 			<div
 				style={{
 					padding: "20px 48px",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "space-between",
 				}}
+				className="flex items-center justify-between max-sm:flex-col"
 			>
 				<p
 					style={{
