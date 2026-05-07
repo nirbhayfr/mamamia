@@ -224,12 +224,16 @@ export default function SkinFinder() {
 										: "transparent",
 								color:
 									selected === type.id
-										? "#1a1a18"
+										? "#F5F0E8"
 										: "rgba(245,240,232,0.75)",
 								border:
 									selected === type.id
 										? "1.5px solid var(--color-gold)"
 										: "1.5px solid rgba(245,240,232,0.25)",
+								boxShadow:
+									selected === type.id
+										? "0 2px 8px rgba(129, 1, 0, 0.2)"
+										: "none",
 							}}
 						>
 							{type.label}
@@ -247,12 +251,19 @@ export default function SkinFinder() {
 						fontSize: "11px",
 						fontWeight: 600,
 						letterSpacing: "0.18em",
-						backgroundColor: "var(--color-gold)",
-						color: "#1a1a18",
-						border: "none",
+
+						// --- GLASSMORPHISM START ---
+						backgroundColor: "var(--color-gold)", // Light transparent white
+						backdropFilter: "blur(12px)", // The "frosted" effect
+						WebkitBackdropFilter: "blur(12px)", // Safari support
+						border: "1px solid rgba(255, 255, 255, 0.2)", // Subtle highlight edge
+						boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Soft shadow for depth
+						// --- GLASSMORPHISM END ---
+
+						color: "#ffffff", // Changed from dark to light for better contrast on glass
 						cursor: "pointer",
 						fontFamily: "var(--font-body)",
-						transition: "opacity 0.2s",
+						transition: "all 0.3s ease", // Smooth transition for hover effects
 						width: isMobile ? "100%" : "auto",
 						justifyContent: isMobile
 							? "center"
@@ -372,7 +383,7 @@ export default function SkinFinder() {
 							</h4>
 							<p
 								style={{
-									color: "var(--color-gold)",
+									color: "#F5F0E8",
 									fontSize: "11px",
 									letterSpacing: "0.04em",
 									margin: 0,

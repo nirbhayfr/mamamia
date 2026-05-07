@@ -11,16 +11,16 @@
 
     --color-text-dark: #1a1a18;
     /* Primary dark text */
-    --color-text-gold: #b8915a;
+    --color-text-gold: #810100;
     /* Gold/amber accent text (subheading, nav links) */
     --color-text-muted: #6b6458;
     /* Muted body text */
     --color-text-light: #f5f0e8;
     /* Light text on dark bg */
 
-    --color-gold: #b8915a;
+    --color-gold: #810100;
     /* Gold accent */
-    --color-gold-dark: #9a7a48;
+    --color-gold-dark: #5d0a0a;
     /* Darker gold for hover */
 
     --color-btn-primary-bg: #1a1a18;
@@ -37,7 +37,7 @@
     --color-ticker-text: #f5f0e8;
     /* Ticker text */
 
-    --color-badge-bg: #b8915a;
+    --color-badge-bg: #810100;
     /* Bestseller badge */
     --color-badge-text: #f5f0e8;
     /* Badge text */

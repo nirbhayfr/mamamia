@@ -81,6 +81,7 @@ export default function RitualSet() {
 								boxShadow:
 									"4px 6px 18px rgba(0,0,0,0.18)",
 								padding: "10px",
+								gap: "5px",
 							}}
 							className="size-26 md:size-30"
 						>

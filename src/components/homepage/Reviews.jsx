@@ -86,8 +86,8 @@ export default function Reviews() {
 				<p
 					style={{
 						fontSize: "14px",
-						// color: "var(--color-text-muted)",
-						color: "#B8915A",
+						color: "var(--color-text-muted)",
+						// color: "#B8915A",
 						fontWeight: 300,
 					}}
 				>
@@ -149,7 +149,7 @@ export default function Reviews() {
 									justifyContent: "center",
 									fontSize: "12px",
 									fontWeight: 600,
-									color: "#7a5c35",
+									color: "var(--color-gold)",
 									letterSpacing: "0.04em",
 									flexShrink: 0,
 								}}
