@@ -1,49 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Jost:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
 
+@theme {
+    --font-display: 'Cormorant Garamond', 'Garamond', Georgia, serif;
+    --font-body: 'Jost', 'Gill Sans', sans-serif;
+}
+
 :root {
-    /* Brand Colors */
     --color-bg-primary: #f5f0e8;
-    /* Warm cream/off-white background */
     --color-bg-secondary: #ede8de;
-    /* Slightly darker cream for right panel */
     --color-bg-dark: #1a1a18;
-    /* Near-black navbar */
-
     --color-text-dark: #1a1a18;
-    /* Primary dark text */
     --color-text-gold: #810100;
-    /* Gold/amber accent text (subheading, nav links) */
     --color-text-muted: #6b6458;
-    /* Muted body text */
     --color-text-light: #f5f0e8;
-    /* Light text on dark bg */
-
     --color-gold: #810100;
-    /* Gold accent */
     --color-gold-dark: #5d0a0a;
-    /* Darker gold for hover */
-
     --color-btn-primary-bg: #1a1a18;
-    /* Black CTA button */
     --color-btn-primary-text: #f5f0e8;
-    /* Cream text on black button */
     --color-btn-outline-border: #1a1a18;
-    /* Outline button border */
     --color-btn-outline-text: #1a1a18;
-    /* Outline button text */
-
     --color-ticker-bg: #1a1a18;
-    /* Bottom ticker bar */
     --color-ticker-text: #f5f0e8;
-    /* Ticker text */
-
     --color-badge-bg: #810100;
-    /* Bestseller badge */
     --color-badge-text: #f5f0e8;
-    /* Badge text */
-
     --color-divider: #d4cfc5;
-    /* Divider lines */
+
 
     /* Soap Swatch Colors */
     --color-soap-jasmine: #2e5540;

@@ -75,8 +75,15 @@ export default function RitualSet() {
 								backgroundColor: soap.color,
 								transform: `rotate(${soap.rotate})`,
 								zIndex: soap.zIndex,
-								top: soap.top,
-								left: soap.left,
+								top:
+									window.innerWidth >= 768
+										? soap.top
+										: "50%",
+								left:
+									window.innerWidth >= 768
+										? soap.left
+										: "50%",
+
 								overflow: "hidden",
 								boxShadow:
 									"4px 6px 18px rgba(0,0,0,0.18)",

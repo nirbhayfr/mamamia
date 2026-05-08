@@ -252,18 +252,16 @@ export default function SkinFinder() {
 						fontWeight: 600,
 						letterSpacing: "0.18em",
 
-						// --- GLASSMORPHISM START ---
-						backgroundColor: "var(--color-gold)", // Light transparent white
-						backdropFilter: "blur(12px)", // The "frosted" effect
-						WebkitBackdropFilter: "blur(12px)", // Safari support
-						border: "1px solid rgba(255, 255, 255, 0.2)", // Subtle highlight edge
-						boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)", // Soft shadow for depth
-						// --- GLASSMORPHISM END ---
+						backgroundColor: "var(--color-gold)",
+						backdropFilter: "blur(12px)",
+						WebkitBackdropFilter: "blur(12px)",
+						border: "1px solid rgba(255, 255, 255, 0.2)",
+						boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
 
-						color: "#ffffff", // Changed from dark to light for better contrast on glass
+						color: "#ffffff",
 						cursor: "pointer",
 						fontFamily: "var(--font-body)",
-						transition: "all 0.3s ease", // Smooth transition for hover effects
+						transition: "all 0.3s ease",
 						width: isMobile ? "100%" : "auto",
 						justifyContent: isMobile
 							? "center"
