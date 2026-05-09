@@ -348,7 +348,8 @@ export default function Footer() {
 						margin: 0,
 					}}
 				>
-					© 2026 MamaMia. All rights reserved.
+					© 2026 MamaMia. All rights reserved. • Created by
+					Banega Brand
 				</p>
 				<div
 					style={{

@@ -1,11 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowRight } from "lucide-react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const skinTypes = [
 	{ id: "dry", label: "DRY SKIN" },
 	{ id: "oily", label: "OILY SKIN" },
 	{ id: "combination", label: "COMBINATION" },
-	{ id: "sensitive", label: "SENSITIVE" },
+	// { id: "sensitive", label: "SENSITIVE" },
 	{ id: "normal", label: "NORMAL" },
 ];
 
@@ -79,29 +83,29 @@ const recommendations = {
 			img: "/jasmine.png",
 		},
 	],
-	sensitive: [
-		{
-			name: "Lavender & Coconut Milk",
-			match: 98,
-			desc: "Ultra Calming",
-			color: "#4a4a8a",
-			img: "/lavender.png",
-		},
-		{
-			name: "Natural Brightening",
-			match: 93,
-			desc: "Glycerin · Gentle",
-			color: "#c07830",
-			img: "/bright.png",
-		},
-		{
-			name: "Jasmine Ghee Soap",
-			match: 90,
-			desc: "Nourishes & Soothes",
-			color: "#2e5540",
-			img: "/jasmine.png",
-		},
-	],
+	// sensitive: [
+	// 	{
+	// 		name: "Lavender & Coconut Milk",
+	// 		match: 98,
+	// 		desc: "Ultra Calming",
+	// 		color: "#4a4a8a",
+	// 		img: "/lavender.png",
+	// 	},
+	// 	{
+	// 		name: "Natural Brightening",
+	// 		match: 93,
+	// 		desc: "Glycerin · Gentle",
+	// 		color: "#c07830",
+	// 		img: "/bright.png",
+	// 	},
+	// 	{
+	// 		name: "Jasmine Ghee Soap",
+	// 		match: 90,
+	// 		desc: "Nourishes & Soothes",
+	// 		color: "#2e5540",
+	// 		img: "/jasmine.png",
+	// 	},
+	// ],
 	normal: [
 		{
 			name: "Red Sandalwood & Lotus",
@@ -129,143 +133,288 @@ const recommendations = {
 
 export default function SkinFinder() {
 	const [selected, setSelected] = useState("dry");
-	const [isMobile, setIsMobile] = useState(false);
 
+	/* refs */
+	const sectionRef = useRef(null);
+	const eyebrowRef = useRef(null);
+	const headingRef = useRef(null);
+	const bodyRef = useRef(null);
+	const pillsRef = useRef(null);
+	const ctaRef = useRef(null);
+	const panelRef = useRef(null);
+	const panelHdrRef = useRef(null);
+	const cardRefs = useRef([]);
+
+	/* ── Entry animation ── */
 	useEffect(() => {
-		const update = () => setIsMobile(window.innerWidth < 768);
-		update();
-		window.addEventListener("resize", update);
-		return () => window.removeEventListener("resize", update);
+		const ctx = gsap.context(() => {
+			const st = {
+				scrollTrigger: {
+					trigger: sectionRef.current,
+					start: "top 78%",
+					once: true,
+				},
+			};
+
+			/* Left column — stagger up */
+			gsap.from(
+				[
+					eyebrowRef.current,
+					headingRef.current,
+					bodyRef.current,
+					pillsRef.current,
+					// ctaRef.current,
+				],
+				{
+					opacity: 0,
+					y: 28,
+					duration: 0.85,
+					ease: "power2.out",
+					stagger: 0.11,
+					...st,
+				},
+			);
+
+			/* Right panel slides in from right */
+			gsap.from(panelRef.current, {
+				opacity: 0,
+				x: 36,
+				duration: 1.0,
+				ease: "power2.out",
+				delay: 0.18,
+				...st,
+			});
+
+			/* Panel header */
+			gsap.from(panelHdrRef.current, {
+				opacity: 0,
+				y: 10,
+				duration: 0.6,
+				ease: "power2.out",
+				delay: 0.35,
+				...st,
+			});
+
+			/* Rec cards fan in */
+			gsap.from(cardRefs.current.filter(Boolean), {
+				opacity: 0,
+				y: 20,
+				duration: 0.65,
+				ease: "expo.out",
+				stagger: 0.1,
+				delay: 0.42,
+				...st,
+			});
+		}, sectionRef);
+
+		return () => ctx.revert();
 	}, []);
+
+	/* ── Skin type switch: animate cards out then in ── */
+	const prevSelected = useRef(selected);
+	useEffect(() => {
+		if (prevSelected.current === selected) return;
+		prevSelected.current = selected;
+
+		const cards = cardRefs.current.filter(Boolean);
+
+		/* out — quick fade + slight up */
+		gsap.to(cards, {
+			opacity: 0,
+			y: -14,
+			duration: 0.22,
+			ease: "power2.in",
+			stagger: 0.05,
+			onComplete() {
+				/* reset position below so they come UP on enter */
+				gsap.set(cards, { y: 18 });
+				/* in — smooth rise */
+				gsap.to(cards, {
+					opacity: 1,
+					y: 0,
+					duration: 0.5,
+					ease: "expo.out",
+					stagger: 0.08,
+				});
+			},
+		});
+
+		/* panel header flicker */
+		gsap.fromTo(
+			panelHdrRef.current,
+			{ opacity: 0, x: -8 },
+			{
+				opacity: 1,
+				x: 0,
+				duration: 0.4,
+				ease: "power2.out",
+				delay: 0.1,
+			},
+		);
+	}, [selected]);
+
+	/* ── Card hover ── */
+	const onCardEnter = (el) => {
+		gsap.to(el, {
+			x: 6,
+			scale: 1.018,
+			backgroundColor: "rgba(255,255,255,0.09)",
+			duration: 0.38,
+			ease: "power2.out",
+			overwrite: "auto",
+		});
+	};
+	const onCardLeave = (el) => {
+		gsap.to(el, {
+			x: 0,
+			scale: 1,
+			backgroundColor: "rgba(255,255,255,0.05)",
+			duration: 0.55,
+			ease: "elastic.out(1, 0.6)",
+			overwrite: "auto",
+		});
+	};
+
+	/* ── Pill hover ── */
+	const onPillEnter = (el, isActive) => {
+		if (isActive) return;
+		gsap.to(el, {
+			scale: 1.06,
+			duration: 0.28,
+			ease: "power2.out",
+			overwrite: "auto",
+		});
+	};
+	const onPillLeave = (el, isActive) => {
+		if (isActive) return;
+		gsap.to(el, {
+			scale: 1,
+			duration: 0.45,
+			ease: "elastic.out(1, 0.55)",
+			overwrite: "auto",
+		});
+	};
 
 	const recs = recommendations[selected];
 	const skinLabel = skinTypes.find((s) => s.id === selected)?.label;
 
 	return (
 		<section
+			ref={sectionRef}
 			style={{
 				backgroundColor: "var(--color-bg-dark)",
 				fontFamily: "var(--font-body)",
-				padding: isMobile ? "48px 20px" : "64px 48px",
-				display: "flex",
-				flexDirection: isMobile ? "column" : "row",
-				gap: isMobile ? "40px" : "48px",
-				alignItems: isMobile ? "stretch" : "center",
-				minHeight: isMobile ? "auto" : "480px",
 			}}
+			className="flex flex-col md:flex-row gap-8 md:gap-12 items-stretch md:items-center px-5 py-10 md:px-12 md:py-16"
 		>
-			{/* Left */}
-			<div style={{ flex: 1, maxWidth: isMobile ? "100%" : "480px" }}>
+			{/* ── Left ── */}
+			<div className="flex-1 max-w-full md:max-w-[480px]">
 				<p
+					ref={eyebrowRef}
 					style={{
 						color: "var(--color-gold)",
 						letterSpacing: "0.22em",
-						fontSize: "11px",
 						fontWeight: 500,
-						marginBottom: "16px",
 					}}
+					className="text-[10px] md:text-[11px] mb-3 md:mb-4"
 				>
 					SKIN FINDER
 				</p>
 
 				<h2
+					ref={headingRef}
 					style={{
 						fontFamily: "var(--font-display)",
 						color: "#f5f0e8",
-						fontSize: isMobile ? "36px" : "46px",
 						fontWeight: 300,
 						lineHeight: 1.1,
-						margin: "0 0 16px",
 					}}
+					className="text-[30px] md:text-[46px] mb-3 md:mb-4"
 				>
 					Find your perfect soap
 				</h2>
 
 				<p
+					ref={bodyRef}
 					style={{
 						color: "rgba(245,240,232,0.55)",
-						fontSize: "14px",
 						lineHeight: 1.75,
-						margin: "0 0 28px",
 						fontWeight: 300,
 						maxWidth: "360px",
 					}}
+					className="text-[13px] md:text-[14px] mb-5 md:mb-7"
 				>
 					Answer a few quick questions and we'll match you with
 					the ideal bar for your skin.
 				</p>
 
-				{/* Skin Type Buttons */}
+				{/* Pills */}
 				<div
-					style={{
-						display: "flex",
-						flexWrap: "wrap",
-						gap: "10px",
-						marginBottom: "32px",
-					}}
+					ref={pillsRef}
+					className="flex flex-wrap gap-2 mb-5 md:mb-8"
 				>
-					{skinTypes.map((type) => (
-						<button
-							key={type.id}
-							onClick={() => setSelected(type.id)}
-							style={{
-								padding: isMobile
-									? "10px 16px"
-									: "12px 20px",
-								fontSize: "10px",
-								fontWeight: 600,
-								letterSpacing: "0.14em",
-								cursor: "pointer",
-								fontFamily: "var(--font-body)",
-								transition: "all 0.2s",
-								backgroundColor:
-									selected === type.id
+					{skinTypes.map((type) => {
+						const active = selected === type.id;
+						return (
+							<button
+								key={type.id}
+								onClick={() => setSelected(type.id)}
+								onMouseEnter={(e) =>
+									onPillEnter(
+										e.currentTarget,
+										active,
+									)
+								}
+								onMouseLeave={(e) =>
+									onPillLeave(
+										e.currentTarget,
+										active,
+									)
+								}
+								style={{
+									fontSize: "9px",
+									fontWeight: 600,
+									letterSpacing: "0.14em",
+									cursor: "pointer",
+									fontFamily: "var(--font-body)",
+									transition:
+										"background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease",
+									backgroundColor: active
 										? "var(--color-gold)"
 										: "transparent",
-								color:
-									selected === type.id
+									color: active
 										? "#F5F0E8"
 										: "rgba(245,240,232,0.75)",
-								border:
-									selected === type.id
+									border: active
 										? "1.5px solid var(--color-gold)"
 										: "1.5px solid rgba(245,240,232,0.25)",
-								boxShadow:
-									selected === type.id
-										? "0 2px 8px rgba(129, 1, 0, 0.2)"
+									boxShadow: active
+										? "0 2px 8px rgba(129,1,0,0.2)"
 										: "none",
-							}}
-						>
-							{type.label}
-						</button>
-					))}
+								}}
+								className="px-3 py-2 md:px-5 md:py-3"
+							>
+								{type.label}
+							</button>
+						);
+					})}
 				</div>
 
 				{/* CTA */}
 				<button
+					ref={ctaRef}
+					className="flex items-center gap-2.5 w-full md:w-auto justify-center md:justify-start px-6 py-3 md:px-8 md:py-4"
 					style={{
-						display: "flex",
-						alignItems: "center",
-						gap: "10px",
-						padding: isMobile ? "14px 24px" : "16px 32px",
-						fontSize: "11px",
+						fontSize: "10px",
 						fontWeight: 600,
 						letterSpacing: "0.18em",
-
 						backgroundColor: "var(--color-gold)",
-						backdropFilter: "blur(12px)",
-						WebkitBackdropFilter: "blur(12px)",
-						border: "1px solid rgba(255, 255, 255, 0.2)",
-						boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-
+						border: "1px solid rgba(255,255,255,0.2)",
+						boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
 						color: "#ffffff",
 						cursor: "pointer",
 						fontFamily: "var(--font-body)",
-						transition: "all 0.3s ease",
-						width: isMobile ? "100%" : "auto",
-						justifyContent: isMobile
-							? "center"
-							: "flex-start",
+						transition: "opacity 0.25s ease",
 					}}
 					onMouseEnter={(e) =>
 						(e.currentTarget.style.opacity = "0.82")
@@ -275,73 +424,54 @@ export default function SkinFinder() {
 					}
 				>
 					FIND MY MATCH
-					<ArrowRight size={14} strokeWidth={2} />
+					<ArrowRight size={13} strokeWidth={2} />
 				</button>
 			</div>
 
-			{/* Right — Recommendations Panel */}
+			{/* ── Right: recommendations panel ── */}
 			<div
+				ref={panelRef}
+				className="flex-1 max-w-full md:max-w-[520px] flex flex-col gap-2 md:gap-3 p-4 md:p-7"
 				style={{
-					flex: 1,
-					maxWidth: isMobile ? "100%" : "520px",
 					backgroundColor: "rgba(255,255,255,0.05)",
 					border: "1px solid rgba(245,240,232,0.1)",
 					borderRadius: "2px",
-					padding: isMobile ? "20px 16px" : "28px",
-					display: "flex",
-					flexDirection: "column",
-					gap: "12px",
 				}}
 			>
-				{/* Panel Header */}
 				<p
+					ref={panelHdrRef}
 					style={{
 						color: "rgba(245,240,232,0.4)",
 						letterSpacing: "0.2em",
-						fontSize: "10px",
 						fontWeight: 500,
-						marginBottom: "4px",
 					}}
+					className="text-[9px] md:text-[10px] mb-1"
 				>
 					RECOMMENDED FOR {skinLabel}
 				</p>
 
-				{/* Recommendation Cards */}
-				{recs.map((rec) => (
+				{recs.map((rec, i) => (
 					<div
 						key={rec.name}
+						ref={(el) => (cardRefs.current[i] = el)}
+						onMouseEnter={(e) => onCardEnter(e.currentTarget)}
+						onMouseLeave={(e) => onCardLeave(e.currentTarget)}
+						className="flex items-center gap-3 md:gap-4 p-3 md:p-4"
 						style={{
-							display: "flex",
-							alignItems: "center",
-							gap: isMobile ? "12px" : "16px",
-							padding: isMobile ? "12px" : "16px",
 							backgroundColor: "rgba(255,255,255,0.05)",
 							border: "1px solid rgba(245,240,232,0.08)",
 							borderRadius: "2px",
 							cursor: "pointer",
-							transition: "filter 0.2s",
+							willChange: "transform",
 						}}
-						onMouseEnter={(e) =>
-							(e.currentTarget.style.filter =
-								"brightness(1.12)")
-						}
-						onMouseLeave={(e) =>
-							(e.currentTarget.style.filter =
-								"brightness(1)")
-						}
 					>
 						{/* Swatch */}
 						<div
+							className="shrink-0 w-10 h-10 md:w-14 md:h-14"
 							style={{
-								flexShrink: 0,
-								width: isMobile ? "48px" : "60px",
-								height: isMobile ? "48px" : "60px",
 								backgroundColor: rec.color,
 								borderRadius: "6px",
 								overflow: "hidden",
-								display: "flex",
-								alignItems: "center",
-								justifyContent: "center",
 							}}
 						>
 							<img
@@ -364,33 +494,39 @@ export default function SkinFinder() {
 								style={{
 									fontFamily: "var(--font-display)",
 									color: "#f5f0e8",
-									fontSize: isMobile
-										? "16px"
-										: "18px",
 									fontWeight: 300,
 									lineHeight: 1.2,
-									margin: "0 0 4px",
-									whiteSpace: isMobile
-										? "normal"
-										: "nowrap",
+									margin: "0 0 3px",
 									overflow: "hidden",
 									textOverflow: "ellipsis",
+									whiteSpace: "nowrap",
 								}}
+								className="text-[15px] md:text-[18px]"
 							>
 								{rec.name}
 							</h4>
 							<p
 								style={{
-									color: "#F5F0E8",
-									fontSize: "11px",
+									color: "rgba(245,240,232,0.65)",
 									letterSpacing: "0.04em",
 									margin: 0,
 									fontWeight: 400,
 								}}
+								className="text-[10px] md:text-[11px]"
 							>
 								{rec.match}% Match · {rec.desc}
 							</p>
 						</div>
+
+						{/* Arrow hint */}
+						<ArrowRight
+							size={13}
+							strokeWidth={1.5}
+							style={{
+								color: "rgba(245,240,232,0.25)",
+								flexShrink: 0,
+							}}
+						/>
 					</div>
 				))}
 			</div>

@@ -1,4 +1,5 @@
 import HeroSection from "../components/homepage/Hero";
+import LiquidCollection from "../components/homepage/LiquidCollection";
 import OurCraft from "../components/homepage/OurCraft";
 import Reviews from "../components/homepage/Reviews";
 import RitualSet from "../components/homepage/RitualSet";
@@ -16,6 +17,7 @@ function Homepage() {
 			<SkinFinder />
 			<OurCraft />
 			<Reviews />
+			<LiquidCollection />
 			<RitualSet />
 			<Footer />
 		</main>

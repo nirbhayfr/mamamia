@@ -1,28 +1,32 @@
-import React, { useState, useEffect } from "react";
-import Navbar from "../layout/Navbar";
+import { useState, useEffect, useRef } from "react";
+import gsap from "gsap";
 
 const soaps = [
 	{
 		name: "JASMINE GHEE",
-		color: "var(--color-soap-jasmine)",
+		category: "PREMIUM GHEE SOAP",
+		washColor: "46,85,64",
 		img: "/jasmine.png",
 		bestseller: false,
 	},
 	{
 		name: "SANDALWOOD & SAFFRON",
-		color: "var(--color-soap-sandalwood)",
+		category: "PREMIUM GHEE SOAP",
+		washColor: "184,112,46",
 		img: "/saffron.png",
 		bestseller: true,
 	},
 	{
 		name: "RED SANDALWOOD & LOTUS",
-		color: "var(--color-soap-red-sandalwood)",
+		category: "LUXURY SOAP",
+		washColor: "139,26,74",
 		img: "/lotus.png",
 		bestseller: false,
 	},
 	{
 		name: "CHARCOAL TEA TREE",
-		color: "var(--color-soap-charcoal)",
+		category: "GLYCERIN SOAP",
+		washColor: "30,30,30",
 		img: "/charcoal.png",
 		bestseller: false,
 	},
@@ -33,13 +37,153 @@ const tickerItems = [
 	"NO PARABENS",
 	"COLD PROCESSED",
 	"HANDCRAFTED IN INDIA",
-	"GH AWARD WINNER",
+	// "GH AWARD WINNER",
 ];
+
+const IMG_SIZES = { mobile: "180px", tablet: "220px", desktop: "260px" };
+const AUTOPLAY_DELAY = 5000;
 
 export default function HeroSection() {
 	const [isMobile, setIsMobile] = useState(false);
 	const [isTablet, setIsTablet] = useState(false);
+	const [current, setCurrent] = useState(0);
 
+	const animating = useRef(false);
+	const currentRef = useRef(0);
+	const slideRefs = useRef([]);
+	const imgRefs = useRef([]);
+	const nameRefs = useRef([]);
+	const categoryRefs = useRef([]);
+	const washRef = useRef(null);
+
+	// Left panel refs
+	const leftPanelRef = useRef(null);
+	const leftEyebrowRef = useRef(null);
+	const leftHeadingRef = useRef(null);
+	const leftBodyRef = useRef(null);
+	const leftBtnsRef = useRef(null);
+
+	const imgSize = isMobile
+		? IMG_SIZES.mobile
+		: isTablet
+			? IMG_SIZES.tablet
+			: IMG_SIZES.desktop;
+
+	function goTo(next, dir) {
+		if (animating.current || next === currentRef.current) return;
+		animating.current = true;
+
+		const outSlide = slideRefs.current[currentRef.current];
+		const inSlide = slideRefs.current[next];
+		const outImg = imgRefs.current[currentRef.current];
+		const inImg = imgRefs.current[next];
+		const outName = nameRefs.current[currentRef.current];
+		const inName = nameRefs.current[next];
+		const outCat = categoryRefs.current[currentRef.current];
+		const inCat = categoryRefs.current[next];
+
+		gsap.set(inSlide, { opacity: 0, pointerEvents: "none" });
+		gsap.set(inImg, {
+			y: dir * 44,
+			scale: 0.9,
+			opacity: 0,
+			width: imgSize,
+		});
+		gsap.set(outImg, { width: imgSize });
+		gsap.set(inName, { y: dir * 16, opacity: 0 });
+		gsap.set(inCat, { y: dir * 16, opacity: 0 });
+
+		inSlide.style.pointerEvents = "all";
+
+		const tl = gsap.timeline({
+			onComplete: () => {
+				gsap.set(outSlide, { opacity: 0, pointerEvents: "none" });
+				gsap.set(outImg, { clearProps: "y,scale,opacity" });
+				gsap.set(outName, { clearProps: "y,opacity" });
+				gsap.set(outCat, { clearProps: "y,opacity" });
+				currentRef.current = next;
+				setCurrent(next);
+				animating.current = false;
+			},
+		});
+
+		tl.to(
+			outImg,
+			{
+				y: -dir * 28,
+				scale: 0.94,
+				opacity: 0,
+				duration: 0.34,
+				ease: "power2.in",
+			},
+			0,
+		)
+			.to(
+				outName,
+				{
+					y: -dir * 10,
+					opacity: 0,
+					duration: 0.22,
+					ease: "power2.in",
+				},
+				0,
+			)
+			.to(
+				outCat,
+				{
+					y: -dir * 10,
+					opacity: 0,
+					duration: 0.22,
+					ease: "power2.in",
+				},
+				0,
+			)
+			.to(
+				outSlide,
+				{ opacity: 0, duration: 0.34, ease: "power2.in" },
+				0,
+			)
+			.add(() => {
+				gsap.to(washRef.current, {
+					opacity: 0,
+					duration: 0.2,
+					ease: "power1.in",
+					onComplete: () => {
+						washRef.current.style.background = `radial-gradient(ellipse 55% 55% at 50% 46%, rgba(${soaps[next].washColor}, 0.13) 0%, transparent 70%)`;
+						gsap.to(washRef.current, {
+							opacity: 1,
+							duration: 0.5,
+							ease: "power2.out",
+						});
+					},
+				});
+			}, 0.16)
+			.to(inSlide, { opacity: 1, duration: 0.14 }, 0.28)
+			.to(
+				inImg,
+				{
+					y: 0,
+					scale: 1,
+					opacity: 1,
+					width: imgSize,
+					duration: 0.54,
+					ease: "power3.out",
+				},
+				0.28,
+			)
+			.to(
+				inName,
+				{ y: 0, opacity: 1, duration: 0.42, ease: "power3.out" },
+				0.38,
+			)
+			.to(
+				inCat,
+				{ y: 0, opacity: 1, duration: 0.42, ease: "power3.out" },
+				0.44,
+			);
+	}
+
+	// Resize listener
 	useEffect(() => {
 		const update = () => {
 			setIsMobile(window.innerWidth < 640);
@@ -50,6 +194,66 @@ export default function HeroSection() {
 		update();
 		window.addEventListener("resize", update);
 		return () => window.removeEventListener("resize", update);
+	}, []);
+
+	// Keep image sizes in sync on resize
+	useEffect(() => {
+		imgRefs.current.forEach((img) => {
+			if (img) img.style.width = imgSize;
+		});
+	}, [imgSize]);
+
+	// Autoplay
+	useEffect(() => {
+		const timer = setInterval(() => {
+			const next = (currentRef.current + 1) % soaps.length;
+			goTo(next, 1);
+		}, AUTOPLAY_DELAY);
+		return () => clearInterval(timer);
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+	// Left panel entrance animation
+	useEffect(() => {
+		const ctx = gsap.context(() => {
+			const tl = gsap.timeline({ delay: 0.1 });
+			tl.from(leftEyebrowRef.current, {
+				opacity: 0,
+				y: 16,
+				duration: 0.6,
+				ease: "power3.out",
+			})
+				.from(
+					leftHeadingRef.current,
+					{
+						opacity: 0,
+						y: 28,
+						duration: 0.75,
+						ease: "power3.out",
+					},
+					"-=0.4",
+				)
+				.from(
+					leftBodyRef.current,
+					{
+						opacity: 0,
+						y: 20,
+						duration: 0.6,
+						ease: "power3.out",
+					},
+					"-=0.45",
+				)
+				.from(
+					leftBtnsRef.current,
+					{
+						opacity: 0,
+						y: 16,
+						duration: 0.55,
+						ease: "power3.out",
+					},
+					"-=0.38",
+				);
+		}, leftPanelRef);
+		return () => ctx.revert();
 	}, []);
 
 	return (
@@ -65,8 +269,9 @@ export default function HeroSection() {
 					flexDirection: isMobile || isTablet ? "column" : "row",
 				}}
 			>
-				{/* Left Panel */}
+				{/* ── Left Panel ── */}
 				<div
+					ref={leftPanelRef}
 					style={{
 						flex: isMobile || isTablet ? "none" : "0 0 50%",
 						backgroundColor: "var(--color-bg-primary)",
@@ -82,8 +287,8 @@ export default function HeroSection() {
 						textAlign: isMobile ? "center" : "left",
 					}}
 				>
-					{/* Eyebrow */}
 					<p
+						ref={leftEyebrowRef}
 						style={{
 							color: "var(--color-gold)",
 							letterSpacing: "0.2em",
@@ -95,8 +300,8 @@ export default function HeroSection() {
 						COLD PROCESSED · HANDCRAFTED
 					</p>
 
-					{/* Headline */}
 					<h1
+						ref={leftHeadingRef}
 						style={{
 							fontFamily: "var(--font-display)",
 							color: "var(--color-text-dark)",
@@ -110,7 +315,7 @@ export default function HeroSection() {
 							fontWeight: 300,
 						}}
 					>
-						Skin rituals,
+						Skin Rituals,
 						<br />
 						<em
 							style={{
@@ -123,8 +328,8 @@ export default function HeroSection() {
 						</em>
 					</h1>
 
-					{/* Body */}
 					<p
+						ref={leftBodyRef}
 						style={{
 							color: "var(--color-text-muted)",
 							fontSize: "14px",
@@ -139,8 +344,8 @@ export default function HeroSection() {
 						nourishment.
 					</p>
 
-					{/* CTAs */}
 					<div
+						ref={leftBtnsRef}
 						style={{
 							display: "flex",
 							gap: "12px",
@@ -202,7 +407,7 @@ export default function HeroSection() {
 					</div>
 				</div>
 
-				{/* Right Panel — Soap Grid */}
+				{/* ── Right Panel — Carousel ── */}
 				<div
 					style={{
 						flex: 1,
@@ -215,62 +420,116 @@ export default function HeroSection() {
 							isMobile || isTablet
 								? "1px solid var(--color-divider)"
 								: "none",
-						display: "grid",
-						gridTemplateColumns: "1fr 1fr",
+						position: "relative",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						overflow: "hidden",
+						minHeight: isMobile
+							? "360px"
+							: isTablet
+								? "420px"
+								: "520px",
 					}}
 				>
+					{/* Soft color wash */}
+					<div
+						ref={washRef}
+						style={{
+							position: "absolute",
+							inset: 0,
+							pointerEvents: "none",
+							background: `radial-gradient(ellipse 55% 55% at 50% 46%, rgba(${soaps[0].washColor}, 0.13) 0%, transparent 70%)`,
+						}}
+					/>
+
+					{/* Slides */}
 					{soaps.map((soap, idx) => (
 						<div
 							key={soap.name}
+							ref={(el) => (slideRefs.current[idx] = el)}
 							style={{
+								position: "absolute",
+								inset: 0,
 								display: "flex",
 								flexDirection: "column",
 								alignItems: "center",
 								justifyContent: "center",
-								position: "relative",
-								borderRight:
-									idx % 2 === 0
-										? "1px solid var(--color-divider)"
-										: "none",
-								borderBottom:
-									idx < 2
-										? "1px solid var(--color-divider)"
-										: "none",
-								padding: isMobile
-									? "20px 8px"
-									: "24px 8px",
-								minHeight: isMobile
-									? "140px"
-									: isTablet
-										? "180px"
-										: "auto",
+								opacity: idx === 0 ? 1 : 0,
+								pointerEvents:
+									idx === 0 ? "all" : "none",
 							}}
 						>
 							<img
+								ref={(el) =>
+									(imgRefs.current[idx] = el)
+								}
 								src={soap.img}
 								alt={soap.name}
 								style={{
-									width: isMobile
-										? "90px"
-										: isTablet
-											? "130px"
-											: "192px",
+									width: imgSize,
 									objectFit: "contain",
+									filter: "drop-shadow(0 16px 40px rgba(26,26,24,0.15))",
+									willChange: "transform, opacity",
+									flexShrink: 0,
 								}}
 							/>
+
+							<span
+								ref={(el) =>
+									(nameRefs.current[idx] = el)
+								}
+								style={{
+									fontFamily: "var(--font-display)",
+									fontSize: isMobile
+										? "18px"
+										: "22px",
+									fontWeight: 400,
+									letterSpacing: "0.32em",
+									color: "var(--color-text-dark)",
+									marginTop: "28px",
+									textTransform: "uppercase",
+									display: "block",
+									textAlign: "center",
+									paddingRight: "0.32em",
+								}}
+							>
+								{soap.name}
+							</span>
+
+							<span
+								ref={(el) =>
+									(categoryRefs.current[idx] = el)
+								}
+								style={{
+									fontFamily: "var(--font-body)",
+									fontSize: "9px",
+									fontWeight: 500,
+									letterSpacing: "0.28em",
+									color: "var(--color-gold)",
+									marginTop: "8px",
+									textTransform: "uppercase",
+									display: "block",
+									textAlign: "center",
+									paddingRight: "0.28em",
+								}}
+							>
+								{soap.category}
+							</span>
+
 							{soap.bestseller && (
 								<div
 									style={{
 										position: "absolute",
-										top: "12px",
-										right: "12px",
+										top: "20px",
+										right: "24px",
 										backgroundColor:
 											"var(--color-badge-bg)",
 										color: "var(--color-badge-text)",
-										letterSpacing: "0.12em",
 										fontSize: "9px",
+										letterSpacing: "0.16em",
 										fontWeight: 600,
-										padding: "4px 8px",
+										padding: "5px 10px",
 									}}
 								>
 									BESTSELLER
@@ -278,10 +537,150 @@ export default function HeroSection() {
 							)}
 						</div>
 					))}
+
+					{/* Prev Arrow */}
+					<button
+						onClick={() =>
+							goTo(
+								(currentRef.current -
+									1 +
+									soaps.length) %
+									soaps.length,
+								-1,
+							)
+						}
+						aria-label="Previous"
+						style={{
+							position: "absolute",
+							left: "16px",
+							top: "50%",
+							transform: "translateY(-50%)",
+							background: "none",
+							border: "none",
+							cursor: "pointer",
+							opacity: 0.45,
+							padding: 0,
+							transition: "opacity 0.2s",
+						}}
+						onMouseEnter={(e) =>
+							(e.currentTarget.style.opacity = "1")
+						}
+						onMouseLeave={(e) =>
+							(e.currentTarget.style.opacity = "0.45")
+						}
+					>
+						<svg
+							width="40"
+							height="40"
+							viewBox="0 0 40 40"
+							fill="none"
+							stroke="var(--color-text-dark)"
+							strokeWidth="0.8"
+						>
+							<line x1="25" y1="10" x2="15" y2="20" />
+							<line x1="15" y1="20" x2="25" y2="30" />
+						</svg>
+					</button>
+
+					{/* Next Arrow */}
+					<button
+						onClick={() =>
+							goTo(
+								(currentRef.current + 1) % soaps.length,
+								1,
+							)
+						}
+						aria-label="Next"
+						style={{
+							position: "absolute",
+							right: "16px",
+							top: "50%",
+							transform: "translateY(-50%)",
+							background: "none",
+							border: "none",
+							cursor: "pointer",
+							opacity: 0.45,
+							padding: 0,
+							transition: "opacity 0.2s",
+						}}
+						onMouseEnter={(e) =>
+							(e.currentTarget.style.opacity = "1")
+						}
+						onMouseLeave={(e) =>
+							(e.currentTarget.style.opacity = "0.45")
+						}
+					>
+						<svg
+							width="40"
+							height="40"
+							viewBox="0 0 40 40"
+							fill="none"
+							stroke="var(--color-text-dark)"
+							strokeWidth="0.8"
+						>
+							<line x1="15" y1="10" x2="25" y2="20" />
+							<line x1="25" y1="20" x2="15" y2="30" />
+						</svg>
+					</button>
+
+					{/* Dot indicators */}
+					<div
+						style={{
+							position: "absolute",
+							bottom: "22px",
+							left: "50%",
+							transform: "translateX(-50%)",
+							display: "flex",
+							gap: "8px",
+						}}
+					>
+						{soaps.map((_, i) => (
+							<div
+								key={i}
+								onClick={() =>
+									goTo(
+										i,
+										i > currentRef.current
+											? 1
+											: -1,
+									)
+								}
+								style={{
+									height: "1px",
+									width:
+										i === current
+											? "32px"
+											: "18px",
+									background:
+										i === current
+											? "var(--color-gold)"
+											: "var(--color-divider)",
+									cursor: "pointer",
+									transition:
+										"width 0.35s ease, background 0.35s ease",
+								}}
+							/>
+						))}
+					</div>
+
+					{/* Counter */}
+					<div
+						style={{
+							position: "absolute",
+							bottom: "20px",
+							right: "24px",
+							fontSize: "10px",
+							letterSpacing: "0.22em",
+							color: "var(--color-text-muted)",
+						}}
+					>
+						{String(current + 1).padStart(2, "0")} /{" "}
+						{String(soaps.length).padStart(2, "0")}
+					</div>
 				</div>
 			</div>
 
-			{/* Ticker Bar */}
+			{/* ── Ticker Bar ── */}
 			<div
 				style={{
 					backgroundColor: "var(--color-ticker-bg)",
