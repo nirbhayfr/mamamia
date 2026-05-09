@@ -460,20 +460,36 @@ export default function HeroSection() {
 									idx === 0 ? "all" : "none",
 							}}
 						>
-							<img
-								ref={(el) =>
-									(imgRefs.current[idx] = el)
-								}
-								src={soap.img}
-								alt={soap.name}
+							<div
 								style={{
 									width: imgSize,
-									objectFit: "contain",
-									filter: "drop-shadow(0 16px 40px rgba(26,26,24,0.15))",
-									willChange: "transform, opacity",
+									height: imgSize,
+									display: "flex",
+									alignItems: "center",
+									justifyContent: "center",
 									flexShrink: 0,
+									overflow: "hidden",
 								}}
-							/>
+							>
+								<img
+									ref={(el) =>
+										(imgRefs.current[idx] = el)
+									}
+									src={soap.img}
+									alt={soap.name}
+									style={{
+										width: "100%",
+										height: "100%",
+										objectFit: "contain",
+										// filter: "drop-shadow(0 16px 40px rgba(26,26,24,0.15))",
+										willChange:
+											"transform, opacity",
+										display: "block",
+										backfaceVisibility: "hidden",
+										transform: "translateZ(0)",
+									}}
+								/>
+							</div>
 
 							<span
 								ref={(el) =>
