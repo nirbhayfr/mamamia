@@ -388,7 +388,7 @@ export default function SoapCollection() {
 							/>
 							<span
 								style={{
-									fontSize: "20px",
+									// fontSize: "20px",
 									fontWeight: 600,
 									letterSpacing: "0.25em",
 									textTransform: "uppercase",
@@ -397,6 +397,7 @@ export default function SoapCollection() {
 									whiteSpace: "nowrap",
 									fontFamily: "var(--font-display)",
 								}}
+								className="max-sm:text-sm text-xl"
 							>
 								{section.label}
 							</span>

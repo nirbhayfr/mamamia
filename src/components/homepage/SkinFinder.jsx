@@ -178,8 +178,8 @@ export default function SkinFinder() {
 			/* Right panel slides in from right */
 			gsap.from(panelRef.current, {
 				opacity: 0,
-				x: 36,
-				duration: 1.0,
+				y: 24,
+				duration: 0.9,
 				ease: "power2.out",
 				delay: 0.18,
 				...st,
@@ -256,18 +256,19 @@ export default function SkinFinder() {
 	/* ── Card hover ── */
 	const onCardEnter = (el) => {
 		gsap.to(el, {
-			x: 6,
-			scale: 1.018,
+			scale: 1.015,
+			y: -2,
 			backgroundColor: "rgba(255,255,255,0.09)",
 			duration: 0.38,
 			ease: "power2.out",
 			overwrite: "auto",
 		});
 	};
+
 	const onCardLeave = (el) => {
 		gsap.to(el, {
-			x: 0,
 			scale: 1,
+			y: 0,
 			backgroundColor: "rgba(255,255,255,0.05)",
 			duration: 0.55,
 			ease: "elastic.out(1, 0.6)",
@@ -308,7 +309,10 @@ export default function SkinFinder() {
 			className="flex flex-col md:flex-row gap-8 md:gap-12 items-stretch md:items-center px-5 py-10 md:px-12 md:py-16"
 		>
 			{/* ── Left ── */}
-			<div className="flex-1 max-w-full md:max-w-[480px]">
+			<div
+				className="w-full md:w-[42%] lg:w-[40%] shrink-0"
+				style={{ minWidth: 0 }}
+			>
 				<p
 					ref={eyebrowRef}
 					style={{
@@ -431,11 +435,12 @@ export default function SkinFinder() {
 			{/* ── Right: recommendations panel ── */}
 			<div
 				ref={panelRef}
-				className="flex-1 max-w-full md:max-w-[520px] flex flex-col gap-2 md:gap-3 p-4 md:p-7"
+				className="w-full md:w-[58%] lg:w-[60%] flex flex-col gap-2 md:gap-3 p-4 md:p-7 shrink-0"
 				style={{
 					backgroundColor: "rgba(255,255,255,0.05)",
 					border: "1px solid rgba(245,240,232,0.1)",
 					borderRadius: "2px",
+					overflow: "hidden",
 				}}
 			>
 				<p
@@ -462,7 +467,14 @@ export default function SkinFinder() {
 							border: "1px solid rgba(245,240,232,0.08)",
 							borderRadius: "2px",
 							cursor: "pointer",
-							willChange: "transform",
+
+							/* IMPORTANT */
+							width: "100%",
+							minWidth: 0,
+							flexShrink: 0,
+							transformOrigin: "center center",
+							willChange: "transform, opacity",
+							backfaceVisibility: "hidden",
 						}}
 					>
 						{/* Swatch */}
