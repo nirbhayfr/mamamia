@@ -347,9 +347,10 @@ export default function Footer() {
 						color: "#6b6458",
 						margin: 0,
 					}}
+					className="max-sm:text-center max-sm:pb-2"
 				>
-					© 2026 MamaMia. All rights reserved. • Created by
-					Banega Brand
+					© 2026 MamaMia. All rights reserved. <br /> • Created
+					by Banega Brand
 				</p>
 				<div
 					style={{
