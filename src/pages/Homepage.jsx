@@ -1,3 +1,4 @@
+import BathSalt from "../components/homepage/BathSalt";
 import HeroSection from "../components/homepage/Hero";
 import LiquidCollection from "../components/homepage/LiquidCollection";
 import OurCraft from "../components/homepage/OurCraft";
@@ -14,6 +15,7 @@ function Homepage() {
 			<Navbar />
 			<HeroSection />
 			<SoapCollection />
+			<BathSalt />
 			<SkinFinder />
 			<OurCraft />
 			<Reviews />

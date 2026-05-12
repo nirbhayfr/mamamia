@@ -9,7 +9,6 @@ const skinTypes = [
 	{ id: "dry", label: "DRY SKIN" },
 	{ id: "oily", label: "OILY SKIN" },
 	{ id: "combination", label: "COMBINATION" },
-	// { id: "sensitive", label: "SENSITIVE" },
 	{ id: "normal", label: "NORMAL" },
 ];
 
@@ -83,29 +82,6 @@ const recommendations = {
 			img: "/jasmine.png",
 		},
 	],
-	// sensitive: [
-	// 	{
-	// 		name: "Lavender & Coconut Milk",
-	// 		match: 98,
-	// 		desc: "Ultra Calming",
-	// 		color: "#4a4a8a",
-	// 		img: "/lavender.png",
-	// 	},
-	// 	{
-	// 		name: "Natural Brightening",
-	// 		match: 93,
-	// 		desc: "Glycerin · Gentle",
-	// 		color: "#c07830",
-	// 		img: "/bright.png",
-	// 	},
-	// 	{
-	// 		name: "Jasmine Ghee Soap",
-	// 		match: 90,
-	// 		desc: "Nourishes & Soothes",
-	// 		color: "#2e5540",
-	// 		img: "/jasmine.png",
-	// 	},
-	// ],
 	normal: [
 		{
 			name: "Red Sandalwood & Lotus",
@@ -131,10 +107,17 @@ const recommendations = {
 	],
 };
 
+const panelShell = {
+	backgroundColor: "rgba(255,255,255,0.05)",
+	border: "1px solid rgba(245,240,232,0.1)",
+	borderRadius: "2px",
+	overflow: "hidden",
+};
+
 export default function SkinFinder() {
 	const [selected, setSelected] = useState("dry");
+	const [revealed, setRevealed] = useState(false);
 
-	/* refs */
 	const sectionRef = useRef(null);
 	const eyebrowRef = useRef(null);
 	const headingRef = useRef(null);
@@ -144,6 +127,8 @@ export default function SkinFinder() {
 	const panelRef = useRef(null);
 	const panelHdrRef = useRef(null);
 	const cardRefs = useRef([]);
+	const placeholderRef = useRef(null);
+	const rightColRef = useRef(null);
 
 	/* ── Entry animation ── */
 	useEffect(() => {
@@ -156,53 +141,30 @@ export default function SkinFinder() {
 				},
 			};
 
-			/* Left column — stagger up */
 			gsap.from(
 				[
 					eyebrowRef.current,
 					headingRef.current,
 					bodyRef.current,
 					pillsRef.current,
-					// ctaRef.current,
+					ctaRef.current,
 				],
 				{
 					opacity: 0,
-					y: 28,
-					duration: 0.85,
-					ease: "power2.out",
-					stagger: 0.11,
+					y: 24,
+					duration: 0.7,
+					ease: "power3.out",
+					stagger: 0.09,
 					...st,
 				},
 			);
 
-			/* Right panel slides in from right */
-			gsap.from(panelRef.current, {
-				opacity: 0,
-				y: 24,
-				duration: 0.9,
-				ease: "power2.out",
-				delay: 0.18,
-				...st,
-			});
-
-			/* Panel header */
-			gsap.from(panelHdrRef.current, {
-				opacity: 0,
-				y: 10,
-				duration: 0.6,
-				ease: "power2.out",
-				delay: 0.35,
-				...st,
-			});
-
-			/* Rec cards fan in */
-			gsap.from(cardRefs.current.filter(Boolean), {
+			gsap.from(placeholderRef.current, {
 				opacity: 0,
 				y: 20,
-				duration: 0.65,
-				ease: "expo.out",
-				stagger: 0.1,
-				delay: 0.42,
+				duration: 0.8,
+				ease: "power3.out",
+				delay: 0.2,
 				...st,
 			});
 		}, sectionRef);
@@ -210,90 +172,127 @@ export default function SkinFinder() {
 		return () => ctx.revert();
 	}, []);
 
-	/* ── Skin type switch: animate cards out then in ── */
-	const prevSelected = useRef(selected);
+	/* ── Reveal ── */
+	const handleReveal = () => {
+		if (revealed) return;
+		setRevealed(true);
+		prevSelected.current = selected;
+
+		gsap.to(placeholderRef.current, {
+			opacity: 0,
+			duration: 0.35,
+			ease: "power2.inOut",
+			onComplete: () => {
+				if (placeholderRef.current)
+					placeholderRef.current.style.display = "none";
+			},
+		});
+
+		// ← add this line
+		panelRef.current.style.visibility = "visible";
+
+		gsap.to(panelRef.current, {
+			opacity: 1,
+			y: 0,
+			duration: 0.55,
+			ease: "power3.out",
+			delay: 0.28,
+		});
+
+		gsap.from(panelHdrRef.current, {
+			opacity: 0,
+			y: 8,
+			duration: 0.45,
+			ease: "power3.out",
+			delay: 0.52,
+		});
+
+		// Cards stagger in cleanly
+		gsap.to(cardRefs.current.filter(Boolean), {
+			opacity: 1,
+			y: 0,
+			duration: 0.5,
+			ease: "power3.out",
+			stagger: 0.08,
+			delay: 0.58,
+		});
+	};
+
+	/* ── Skin type switch ── */
+	const prevSelected = useRef(null);
 	useEffect(() => {
-		if (prevSelected.current === selected) return;
+		if (!revealed || prevSelected.current === selected) return;
 		prevSelected.current = selected;
 
 		const cards = cardRefs.current.filter(Boolean);
 
-		/* out — quick fade + slight up */
 		gsap.to(cards, {
 			opacity: 0,
-			y: -14,
-			duration: 0.22,
+			y: -10,
+			duration: 0.18,
 			ease: "power2.in",
-			stagger: 0.05,
+			stagger: 0.04,
 			onComplete() {
-				/* reset position below so they come UP on enter */
-				gsap.set(cards, { y: 18 });
-				/* in — smooth rise */
+				gsap.set(cards, { y: 14 });
 				gsap.to(cards, {
 					opacity: 1,
 					y: 0,
-					duration: 0.5,
-					ease: "expo.out",
-					stagger: 0.08,
+					duration: 0.42,
+					ease: "power3.out",
+					stagger: 0.07,
 				});
 			},
 		});
 
-		/* panel header flicker */
 		gsap.fromTo(
 			panelHdrRef.current,
-			{ opacity: 0, x: -8 },
+			{ opacity: 0, x: -6 },
 			{
 				opacity: 1,
 				x: 0,
-				duration: 0.4,
-				ease: "power2.out",
-				delay: 0.1,
+				duration: 0.35,
+				ease: "power3.out",
+				delay: 0.08,
 			},
 		);
-	}, [selected]);
+	}, [selected, revealed]);
 
-	/* ── Card hover ── */
-	const onCardEnter = (el) => {
+	/* ── Hover ── */
+	const onCardEnter = (el) =>
 		gsap.to(el, {
-			scale: 1.015,
+			scale: 1.012,
 			y: -2,
 			backgroundColor: "rgba(255,255,255,0.09)",
-			duration: 0.38,
+			duration: 0.32,
 			ease: "power2.out",
 			overwrite: "auto",
 		});
-	};
-
-	const onCardLeave = (el) => {
+	const onCardLeave = (el) =>
 		gsap.to(el, {
 			scale: 1,
 			y: 0,
 			backgroundColor: "rgba(255,255,255,0.05)",
-			duration: 0.55,
-			ease: "elastic.out(1, 0.6)",
+			duration: 0.5,
+			ease: "elastic.out(1, 0.65)",
 			overwrite: "auto",
 		});
-	};
-
-	/* ── Pill hover ── */
 	const onPillEnter = (el, isActive) => {
-		if (isActive) return;
-		gsap.to(el, {
-			scale: 1.06,
-			duration: 0.28,
-			ease: "power2.out",
-			overwrite: "auto",
-		});
+		if (!isActive)
+			gsap.to(el, {
+				scale: 1.05,
+				duration: 0.25,
+				ease: "power2.out",
+				overwrite: "auto",
+			});
 	};
 	const onPillLeave = (el, isActive) => {
-		if (isActive) return;
-		gsap.to(el, {
-			scale: 1,
-			duration: 0.45,
-			ease: "elastic.out(1, 0.55)",
-			overwrite: "auto",
-		});
+		if (!isActive)
+			gsap.to(el, {
+				scale: 1,
+				duration: 0.4,
+				ease: "elastic.out(1, 0.55)",
+				overwrite: "auto",
+			});
 	};
 
 	const recs = recommendations[selected];
@@ -315,41 +314,49 @@ export default function SkinFinder() {
 			>
 				<p
 					ref={eyebrowRef}
+					className="text-[10px] md:text-[11px] mb-3 md:mb-4"
 					style={{
 						color: "var(--color-gold)",
 						letterSpacing: "0.22em",
 						fontWeight: 500,
 					}}
-					className="text-[10px] md:text-[11px] mb-3 md:mb-4"
 				>
 					SKIN FINDER
 				</p>
 
 				<h2
 					ref={headingRef}
+					className="text-[30px] md:text-[46px] mb-3 md:mb-4"
 					style={{
 						fontFamily: "var(--font-display)",
 						color: "#f5f0e8",
 						fontWeight: 300,
 						lineHeight: 1.1,
 					}}
-					className="text-[30px] md:text-[46px] mb-3 md:mb-4"
 				>
 					Find your perfect soap
 				</h2>
 
 				<p
 					ref={bodyRef}
+					className="text-[13px] md:text-[14px] mb-5 md:mb-7"
 					style={{
 						color: "rgba(245,240,232,0.55)",
 						lineHeight: 1.75,
 						fontWeight: 300,
 						maxWidth: "360px",
 					}}
-					className="text-[13px] md:text-[14px] mb-5 md:mb-7"
 				>
-					Answer a few quick questions and we'll match you with
-					the ideal bar for your skin.
+					Select your skin type below and hit{" "}
+					<em
+						style={{
+							fontStyle: "italic",
+							color: "rgba(245,240,232,0.75)",
+						}}
+					>
+						Find My Match
+					</em>{" "}
+					— we'll surface the right bar for you.
 				</p>
 
 				{/* Pills */}
@@ -375,6 +382,7 @@ export default function SkinFinder() {
 										active,
 									)
 								}
+								className="px-3 py-2 md:px-5 md:py-3"
 								style={{
 									fontSize: "9px",
 									fontWeight: 600,
@@ -396,7 +404,6 @@ export default function SkinFinder() {
 										? "0 2px 8px rgba(129,1,0,0.2)"
 										: "none",
 								}}
-								className="px-3 py-2 md:px-5 md:py-3"
 							>
 								{type.label}
 							</button>
@@ -404,143 +411,224 @@ export default function SkinFinder() {
 					})}
 				</div>
 
-				{/* CTA */}
+				{/* CTA — no GSAP on this, instant response */}
 				<button
 					ref={ctaRef}
+					onClick={handleReveal}
 					className="flex items-center gap-2.5 w-full md:w-auto justify-center md:justify-start px-6 py-3 md:px-8 md:py-4"
 					style={{
 						fontSize: "10px",
 						fontWeight: 600,
 						letterSpacing: "0.18em",
-						backgroundColor: "var(--color-gold)",
-						border: "1px solid rgba(255,255,255,0.2)",
-						boxShadow: "0 4px 30px rgba(0,0,0,0.1)",
+						backgroundColor: revealed
+							? "rgba(129,1,0,0.45)"
+							: "var(--color-gold)",
+						border: "1px solid rgba(255,255,255,0.15)",
 						color: "#ffffff",
-						cursor: "pointer",
+						cursor: revealed ? "default" : "pointer",
 						fontFamily: "var(--font-body)",
-						transition: "opacity 0.25s ease",
+						transition: "background-color 0.3s ease",
+						pointerEvents: revealed ? "none" : "auto",
 					}}
-					onMouseEnter={(e) =>
-						(e.currentTarget.style.opacity = "0.82")
-					}
-					onMouseLeave={(e) =>
-						(e.currentTarget.style.opacity = "1")
-					}
 				>
-					FIND MY MATCH
+					{revealed ? "SHOWING YOUR MATCHES" : "FIND MY MATCH"}
 					<ArrowRight size={13} strokeWidth={2} />
 				</button>
 			</div>
 
-			{/* ── Right: recommendations panel ── */}
+			{/* ── Right ── */}
 			<div
-				ref={panelRef}
-				className="w-full md:w-[58%] lg:w-[60%] flex flex-col gap-2 md:gap-3 p-4 md:p-7 shrink-0"
-				style={{
-					backgroundColor: "rgba(255,255,255,0.05)",
-					border: "1px solid rgba(245,240,232,0.1)",
-					borderRadius: "2px",
-					overflow: "hidden",
-				}}
+				ref={rightColRef}
+				className="w-full md:w-[58%] lg:w-[60%] shrink-0 relative"
+				style={{ minHeight: "280px" }}
 			>
-				<p
-					ref={panelHdrRef}
-					style={{
-						color: "rgba(245,240,232,0.4)",
-						letterSpacing: "0.2em",
-						fontWeight: 500,
-					}}
-					className="text-[9px] md:text-[10px] mb-1"
+				{/* Placeholder */}
+				<div
+					ref={placeholderRef}
+					className="absolute inset-0 flex flex-col items-center justify-center gap-5 p-8 md:p-12"
+					style={{ ...panelShell }}
 				>
-					RECOMMENDED FOR {skinLabel}
-				</p>
-
-				{recs.map((rec, i) => (
 					<div
-						key={rec.name}
-						ref={(el) => (cardRefs.current[i] = el)}
-						onMouseEnter={(e) => onCardEnter(e.currentTarget)}
-						onMouseLeave={(e) => onCardLeave(e.currentTarget)}
-						className="flex items-center gap-3 md:gap-4 p-3 md:p-4"
 						style={{
-							backgroundColor: "rgba(255,255,255,0.05)",
-							border: "1px solid rgba(245,240,232,0.08)",
-							borderRadius: "2px",
-							cursor: "pointer",
-
-							/* IMPORTANT */
+							display: "flex",
+							flexDirection: "column",
+							gap: "12px",
 							width: "100%",
-							minWidth: 0,
-							flexShrink: 0,
-							transformOrigin: "center center",
-							willChange: "transform, opacity",
-							backfaceVisibility: "hidden",
+							maxWidth: "340px",
 						}}
 					>
-						{/* Swatch */}
+						{[100, 72, 85].map((w, i) => (
+							<div
+								key={i}
+								style={{
+									display: "flex",
+									alignItems: "center",
+									gap: "14px",
+								}}
+							>
+								<div
+									style={{
+										width: "40px",
+										height: "40px",
+										borderRadius: "6px",
+										background:
+											"rgba(255,255,255,0.06)",
+										flexShrink: 0,
+									}}
+								/>
+								<div style={{ flex: 1 }}>
+									<div
+										style={{
+											height: "8px",
+											borderRadius: "2px",
+											background:
+												"rgba(255,255,255,0.08)",
+											width: `${w}%`,
+											marginBottom: "7px",
+										}}
+									/>
+									<div
+										style={{
+											height: "6px",
+											borderRadius: "2px",
+											background:
+												"rgba(255,255,255,0.05)",
+											width: "48%",
+										}}
+									/>
+								</div>
+							</div>
+						))}
+					</div>
+					<p
+						style={{
+							color: "rgba(245,240,232,0.2)",
+							fontSize: "10px",
+							letterSpacing: "0.22em",
+							fontWeight: 500,
+							textTransform: "uppercase",
+							marginTop: "6px",
+							textAlign: "center",
+						}}
+					>
+						Select your skin type &amp; find your match
+					</p>
+				</div>
+
+				{/* Recommendations panel */}
+				<div
+					ref={panelRef}
+					className="w-full flex flex-col gap-2 md:gap-3 p-5 md:p-8"
+					style={{
+						...panelShell,
+						opacity: 0,
+						transform: "translateY(20px)",
+						visibility: "hidden",
+					}}
+				>
+					<p
+						ref={panelHdrRef}
+						className="text-[9px] md:text-[10px] mb-2"
+						style={{
+							color: "rgba(245,240,232,0.4)",
+							letterSpacing: "0.2em",
+							fontWeight: 500,
+						}}
+					>
+						RECOMMENDED FOR {skinLabel}
+					</p>
+
+					{recs.map((rec, i) => (
 						<div
-							className="shrink-0 w-10 h-10 md:w-14 md:h-14"
+							key={rec.name}
+							ref={(el) => (cardRefs.current[i] = el)}
+							onMouseEnter={(e) =>
+								onCardEnter(e.currentTarget)
+							}
+							onMouseLeave={(e) =>
+								onCardLeave(e.currentTarget)
+							}
+							className="flex items-center gap-3 md:gap-5 p-3 md:p-4 pr-5 md:pr-6"
 							style={{
-								backgroundColor: rec.color,
-								borderRadius: "6px",
-								overflow: "hidden",
+								opacity: 0,
+								transform: "translateY(16px)",
+								backgroundColor:
+									"rgba(255,255,255,0.05)",
+								border: "1px solid rgba(245,240,232,0.08)",
+								borderRadius: "2px",
+								cursor: "pointer",
+								width: "100%",
+								minWidth: 0,
+								transformOrigin: "center center",
+								willChange: "transform, opacity",
+								backfaceVisibility: "hidden",
 							}}
 						>
-							<img
-								src={rec.img}
-								alt={rec.name}
+							<div
+								className="shrink-0 w-10 h-10 md:w-14 md:h-14"
 								style={{
-									width: "100%",
-									height: "100%",
-									objectFit: "cover",
+									backgroundColor: rec.color,
+									borderRadius: "6px",
+									overflow: "hidden",
 								}}
-								onError={(e) => {
-									e.target.style.display = "none";
+							>
+								<img
+									src={rec.img}
+									alt={rec.name}
+									style={{
+										width: "100%",
+										height: "100%",
+										objectFit: "cover",
+									}}
+									onError={(e) => {
+										e.target.style.display =
+											"none";
+									}}
+								/>
+							</div>
+
+							<div style={{ flex: 1, minWidth: 0 }}>
+								<h4
+									className="text-[15px] md:text-[18px]"
+									style={{
+										fontFamily:
+											"var(--font-display)",
+										color: "#f5f0e8",
+										fontWeight: 300,
+										lineHeight: 1.2,
+										margin: "0 0 3px",
+										overflow: "hidden",
+										textOverflow: "ellipsis",
+										whiteSpace: "nowrap",
+									}}
+								>
+									{rec.name}
+								</h4>
+								<p
+									className="text-[10px] md:text-[11px]"
+									style={{
+										color: "rgba(245,240,232,0.65)",
+										letterSpacing: "0.04em",
+										margin: 0,
+										fontWeight: 400,
+									}}
+								>
+									{rec.match}% Match · {rec.desc}
+								</p>
+							</div>
+
+							<ArrowRight
+								size={13}
+								strokeWidth={1.5}
+								style={{
+									color: "rgba(245,240,232,0.25)",
+									flexShrink: 0,
+									marginLeft: "8px",
 								}}
 							/>
 						</div>
-
-						{/* Info */}
-						<div style={{ flex: 1, minWidth: 0 }}>
-							<h4
-								style={{
-									fontFamily: "var(--font-display)",
-									color: "#f5f0e8",
-									fontWeight: 300,
-									lineHeight: 1.2,
-									margin: "0 0 3px",
-									overflow: "hidden",
-									textOverflow: "ellipsis",
-									whiteSpace: "nowrap",
-								}}
-								className="text-[15px] md:text-[18px]"
-							>
-								{rec.name}
-							</h4>
-							<p
-								style={{
-									color: "rgba(245,240,232,0.65)",
-									letterSpacing: "0.04em",
-									margin: 0,
-									fontWeight: 400,
-								}}
-								className="text-[10px] md:text-[11px]"
-							>
-								{rec.match}% Match · {rec.desc}
-							</p>
-						</div>
-
-						{/* Arrow hint */}
-						<ArrowRight
-							size={13}
-							strokeWidth={1.5}
-							style={{
-								color: "rgba(245,240,232,0.25)",
-								flexShrink: 0,
-							}}
-						/>
-					</div>
-				))}
+					))}
+				</div>
 			</div>
 		</section>
 	);
